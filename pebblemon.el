@@ -17,12 +17,21 @@
 ;;;###autoload
 (defun pebblemon-send (title msg)
   (interactive "sTitle: \nsMessage: ")
-  (start-process "jabber.el.pebble.strudelline.net" nil
-		 "curl"
-		 "-d" (json-encode `((auth . ,pebblemon-auth)
-				     (title . ,title)
-				     (message . ,msg)))
-		 "https://pebblemon.appspot.com/send"))
+  (if (string-match-p "^/" pebblemon-auth)
+	(start-process "jabber.el.pebble.strudelline.net" nil
+		       "curl"
+		       "-F" (concat "user=" (substring pebblemon-auth 1))
+		       "-F" (concat "title=" title)
+		       "-F" (concat "message=" msg)
+		       "http://linode.strudelline.net:8088/push")
+    
+    (start-process "jabber.el.pebble.strudelline.net" nil
+		   "curl"
+		   "-d" (json-encode `((auth . ,pebblemon-auth)
+				       (title . ,title)
+				       (message . ,msg)))
+		   "https://pebblemon.appspot.com/send")
+    ))
 
 ;;;###autoload
 (defgroup pebblemon nil
